@@ -18,3 +18,4 @@ htmlcov/
 .cache/
 .pyre/
 .mypy_cache/
+deadlines.db

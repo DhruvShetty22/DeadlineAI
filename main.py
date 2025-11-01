@@ -1,15 +1,19 @@
-import getpass
+import os
 from datetime import date, timedelta
 from typing import List
-import dotenv
-dotenv.load_dotenv()  
+from dotenv import load_dotenv  # <-- NEW IMPORT
 
+# --- Import from the correct package ---
 from imap_tools import MailBox, A
 
-from agent import extractor_agent, Deadline  
-from database_manager import create_table, save_deadlines, DB_FILE 
+# --- Import from our other scripts ---
+from agent import extractor_agent, Deadline  # The "Brain"
+from database_manager import create_table, save_deadlines, DB_FILE # The "Memory"
 
+# --- Load all variables from .env file ---
+load_dotenv()
 
+# --- Your IITK Email Server Settings ---
 IMAP_SERVER = "qasid.iitk.ac.in"
 IMAP_PORT = 993
 
@@ -23,16 +27,15 @@ def fetch_recent_emails(username, password, days=7) -> List[dict]:
     try:
         with MailBox(IMAP_SERVER, port=IMAP_PORT).login(username, password) as mailbox:
             print("Login successful. Fetching emails...")
+            
             criteria = A(date_gte=date.today() - timedelta(days=days), seen=False)
             
-            # mailbox.fetch returns a generator. We reverse it to get newest first.
-            # We'll limit processing to the newest 50 to be safe.
             for i, msg in enumerate(mailbox.fetch(criteria, reverse=True)):
                 if i >= 50:
                     print("Processing limit (50) reached. Stopping email fetch.")
                     break
                     
-                if msg.text: 
+                if msg.text: # msg.text is the plain-text body
                     fetched_emails.append({
                         "subject": msg.subject,
                         "body": msg.text
@@ -55,9 +58,16 @@ def run_agent():
     print("Initializing database...")
     create_table() # From database_manager.py
     
-    # --- 2. Get Credentials ---
-    user_login = input("Enter your userId(e.g., 'sdhruv23'): ")
-    pwd = getpass.getpass("Enter your password: ")
+    # --- 2. Get Credentials (from .env) ---
+    # We now read from the environment variables
+    user_login = os.environ.get("EMAIL_USER")
+    pwd = os.environ.get("EMAIL_PASS")
+    
+    if not user_login or not pwd:
+        print("Error: EMAIL_USER or EMAIL_PASS not set in .env file.")
+        return
+    
+    print("Credentials loaded successfully.")
     
     # --- 3. Fetch Emails (Our "Tool") ---
     emails_to_process = fetch_recent_emails(user_login, pwd)
@@ -73,7 +83,6 @@ def run_agent():
     for i, email in enumerate(emails_to_process):
         print(f"Processing email {i+1}/{len(emails_to_process)}: {email['subject'][:50]}...")
         try:
-            # Run the agent from agent.py
             result = extractor_agent.invoke({
                 "subject": email['subject'],
                 "body": email['body']
@@ -87,10 +96,12 @@ def run_agent():
                 
         except Exception as e:
             print(f"  > Error processing email with AI: {e}")
+    
     print("\n--- 💾 Saving results to database ---")
-    save_deadlines(all_extracted_deadlines) # From database_manager.py
+    save_deadlines(all_extracted_deadlines) 
     
     print("\n--- ✅ Agent run complete! ---")
+
 
 if __name__ == "__main__":
     run_agent()
