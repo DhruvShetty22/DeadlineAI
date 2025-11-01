@@ -2,16 +2,14 @@ import getpass
 from datetime import date, timedelta
 from typing import List
 import dotenv
-dotenv.load_dotenv()  # Load environment variables from .env
+dotenv.load_dotenv()  
 
-# --- Import from the correct package ---
 from imap_tools import MailBox, A
 
-# --- Import from our other scripts ---
-from agent import extractor_agent, Deadline  # The "Brain"
-from database_manager import create_table, save_deadlines, DB_FILE # The "Memory"
+from agent import extractor_agent, Deadline  
+from database_manager import create_table, save_deadlines, DB_FILE 
 
-# --- Your IITK Email Server Settings ---
+
 IMAP_SERVER = "qasid.iitk.ac.in"
 IMAP_PORT = 993
 
@@ -23,12 +21,8 @@ def fetch_recent_emails(username, password, days=7) -> List[dict]:
     print(f"Connecting to {IMAP_SERVER}...")
     
     try:
-        # Use 'with' to auto-login and auto-logout
         with MailBox(IMAP_SERVER, port=IMAP_PORT).login(username, password) as mailbox:
             print("Login successful. Fetching emails...")
-            
-            # --- THIS IS THE CORRECTED LINE ---
-            # The library uses 'seen=False' not 'unseen=True'.
             criteria = A(date_gte=date.today() - timedelta(days=days), seen=False)
             
             # mailbox.fetch returns a generator. We reverse it to get newest first.
@@ -38,7 +32,7 @@ def fetch_recent_emails(username, password, days=7) -> List[dict]:
                     print("Processing limit (50) reached. Stopping email fetch.")
                     break
                     
-                if msg.text: # msg.text is the plain-text body
+                if msg.text: 
                     fetched_emails.append({
                         "subject": msg.subject,
                         "body": msg.text
@@ -93,13 +87,10 @@ def run_agent():
                 
         except Exception as e:
             print(f"  > Error processing email with AI: {e}")
-
-    # --- 5. Save to Database (The "Memory") ---
     print("\n--- 💾 Saving results to database ---")
     save_deadlines(all_extracted_deadlines) # From database_manager.py
     
     print("\n--- ✅ Agent run complete! ---")
 
-# --- This runs the main function when you start the script ---
 if __name__ == "__main__":
     run_agent()
