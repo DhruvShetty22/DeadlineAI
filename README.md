@@ -1,4 +1,3 @@
-**DeadlineAI **
 
 This project is a submission for the Software Engineer intern application.
 
@@ -16,6 +15,9 @@ This agent automates the entire process. It connects to the user's university em
 
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1f4b26d6-846e-4bec-8397-1cd98c631b66" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c42bd08c-8698-45f0-8a64-5d15d19194d9" />
+
+
 
 
 2. Features
