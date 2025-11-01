@@ -1,0 +1,9 @@
+streamlit
+pandas
+langchain
+langchain-core
+langchain-google-genai
+pydantic
+imap-tools
+python-dotenv
+google-generativeai
