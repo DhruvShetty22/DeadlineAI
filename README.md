@@ -1,4 +1,4 @@
-AI Email Deadline Agent
+**DeadlineAI **
 
 This project is a submission for the Software Engineer intern application.
 
