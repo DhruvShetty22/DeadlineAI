@@ -2,6 +2,7 @@ streamlit
 pandas
 langchain
 langchain-core
+langchain-community
 langchain-google-genai
 pydantic
 imap-tools
